@@ -1,0 +1,123 @@
+
+
+#include <cstdlib>
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+
+using namespace std;
+
+int main() {
+    const int nbU = 3; //const because of array declaration constraints
+    int a[nbU][nbU + 1]; //array to store the original matrix
+    double tol;//the tolerance
+    const int nb = 3;//nb of iterations
+    double initials[nbU];//initial guesses
+    double n[nbU];//array to  hold the changing values
+    double error[nbU] = {0};//array to hold the errors
+    int count = 1;
+    double maxError = 0;
+    double results[nb + 1][nbU + 2];//main array that we will be working on
+    
+    
+    for (int i = 0; i < nbU; i++) {
+        for (int j = 0; j < nbU; j++) {
+            cout << "Enter the coefficient of row " << (i + 1) << " col " 
+                    << (j + 1) << endl;
+            cin >> a[i][j];
+        }
+        cout << "Enter the values of the right hand side of the equation: " 
+                << endl;
+        cin >> a[i][nbU];
+    }
+
+    cout << "Enter the tolerance: " << endl;
+    cin>>tol;
+
+    cout << "There will be a maximum of " << nb << " iterations." << endl;
+
+    for (int i = 0; i < nbU; i++) {
+        cout << "Enter the initial guess for x" << i << ": ";
+        cin >> initials[i];
+    }
+
+    for (int i = 0; i < nbU; i++) {
+        n[i] = initials[i];
+    }
+
+    for (int i = 0; i < nb + 1; i++) {
+        for (int j = 0; j < nbU + 2; j++) {
+            results[i][j] = 0;
+        }
+    }
+
+    for (int i = 1; i <= nbU; i++) {
+        results[0][i] = initials[i - 1];//to put the initial guesses 
+    }
+
+    //Jacobi
+    //double prev[nbU];
+
+    for (int i = 1; i <= nb; i++)
+        results[i][0] = i;
+
+    //Gauss-Siedel
+    for (int i = 1; i <= nb; i++) {
+
+        for (int j = 1; j <= nbU; j++) {
+
+            for (int q = 0; q <= nbU; q++) {
+
+                if (q != j - 1) {
+                    if (q == nbU)
+                        results[i][j] +=
+                                (1.0 / a[j - 1][j - 1]) * (a[j - 1][q]);
+
+                    else
+                        results[i][j] += 
+                            (-1.0 / a[j - 1][j - 1])*(a[j - 1][q]) * (n[q]);
+                }
+            }
+            
+            error[j - 1] = results[i][j] - results[i - 1][j];
+            
+            //for jacobi we don't update it here,so just delete line 85
+            n[j - 1] = results[i][j];
+        }
+        
+        //Jacobi: Just remove the comments from lines 89-90-91
+        //for(int c=0;c<nbU;c++){
+        //   n[c]=results[i][c+1];
+        //  }
+       
+        for (int e = 0; e < nbU; e++) {
+           maxError = max(maxError, abs(error[e]));
+              }
+
+        results[i][nbU + 1] = maxError;
+        maxError = 0;
+        count++;
+
+        if (results[i][nbU + 1] < tol)
+            break;
+    }
+    
+    cout<<"n\t";
+    for(int i=0;i<nbU;i++){
+        cout<<"x"<<i<<"\t";
+    }
+    cout<<"error"<<endl;
+
+    
+    for (int i = 0; i < count; i++) {
+
+        for (int j = 0; j < nbU + 2; j++) {
+            cout << setw(6) << fixed 
+                    << setprecision(3) << results[i][j] << "  ";
+        }
+        cout << endl;
+    }
+
+    return 0;
+}
+
